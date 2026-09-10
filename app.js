@@ -658,7 +658,7 @@ function pickOne(sel, after) {
 
 // ── Layout panel ──────────────────────────────────────────────────
 function knobPanel() {
-  const p = el('aside', 'knobs');
+  const p = el('aside', 'knobs is-away');
   p.id = 'knobs';
   p.innerHTML = `
     <header class="knobs__top">
@@ -696,7 +696,21 @@ function knobPanel() {
       c.addEventListener('change', () => { state[k] = c.checked; apply(); save(); go(step); });
     });
     const kn = document.getElementById('knobs');
-    document.getElementById('k-hide').onclick = () => kn.classList.toggle('is-min');
+    const opener = el('button', 'knobs__open', '⚙');
+    opener.id = 'knobs-open';
+    opener.title = 'Layout controls (L)';
+    document.getElementById('stage').appendChild(opener);
+    const show = (on) => {
+      kn.classList.toggle('is-away', !on);
+      opener.classList.toggle('is-away', on);
+    };
+    opener.onclick = () => show(true);
+    document.getElementById('k-hide').onclick = () => show(false);
+    window.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() !== 'l' || e.metaKey || e.ctrlKey) return;
+      if (/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) return;
+      show(kn.classList.contains('is-away'));
+    });
     document.getElementById('k-reset').onclick = () => {
       Object.entries(KNOBS).forEach(([k, v]) => { state[k] = v[4]; });
       Object.entries(TOGGLES).forEach(([k, v]) => { state[k] = v[1]; });
