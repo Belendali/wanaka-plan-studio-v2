@@ -160,7 +160,7 @@ function mount() {
   const w = el('div', 'ws');
   w.innerHTML = `
     <header class="ws__top">
-      <span class="ws__brand"><img src="assets/crew-planner.webp" alt=""><b>Plan Studio</b></span>
+      <span class="ws__brand"><img src="assets/crew-planner.webp" alt="Plan Studio"></span>
       <span class="ws__doc">${esc(P.title)}</span>
       <span class="ws__faces">${CREW.map((k) =>
         `<img src="assets/crew-${k}.webp" alt="${CREW_NAME[k]}" title="${CREW_NAME[k]} Wana">`).join('')}</span>
