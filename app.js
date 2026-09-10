@@ -134,11 +134,9 @@ function sv(inner) {
 // Visual style folded into Overview, and asset picking left the plan entirely:
 // the first build is made by the crew, and swapping in library assets happens
 // afterwards, in the Assets tab, where you can see the thing in the game.
-// Player feel left the plan too: its four sliders are engine tuning nobody can
-// judge before playing, and its prose said what Core gameplay already says.
-// Session length and difficulty — the parts a person has an opinion on — move
-// into Overview beside the scope.
-const STEPS = [['01', 'Overview'], ['02', 'Review']];
+// One page. Review was a second reading of a plan you had just read, so the
+// approval happens where the decisions are, and the footer states the
+// consequence instead of a stage list.
 const CREW = ['planner', 'artist', 'developer', 'tester', 'marketing'];
 
 let step = 0;
@@ -149,43 +147,30 @@ function mount() {
   w.innerHTML = `
     <header class="ws__top">
       <span class="ws__brand"><img src="assets/crew-planner.webp" alt=""><b>Plan Studio</b></span>
-      <nav class="ws__steps" id="steps">
-        ${STEPS.map(([n, t], i) => `
-          <button class="st" data-i="${i}"><i></i><em>${n}</em><span>${t}</span></button>`).join('')}
-      </nav>
+      <span class="ws__doc">${esc(P.title)}</span>
       <span class="ws__faces">${CREW.map((k) => `<img src="assets/crew-${k}.webp" alt="">`).join('')}</span>
       <button class="ws__x" title="Close">✕</button>
     </header>
     <div class="ws__main" id="main"></div>
     <footer class="ws__foot">
-      <span class="ws__stage" id="stagelbl"></span>
-      <span class="ws__acts" id="acts"></span>
+      <span class="ws__sum" id="sum"></span>
+      <span class="ws__acts">
+        <button class="b b--sec">Close</button>
+        <button class="b b--go">Approve plan &amp; start build<i>↗</i></button>
+      </span>
     </footer>`;
   document.getElementById('stage').appendChild(w);
-  w.querySelectorAll('.st').forEach((b) => { b.onclick = () => go(+b.dataset.i); });
-  go(0);
+  document.getElementById('main').innerHTML = stOverview();
+  paintSum();
+  wire();
 }
 
-function go(i) {
-  step = Math.max(0, Math.min(STEPS.length - 1, i));
-  document.querySelectorAll('.st').forEach((b, k) => b.classList.toggle('is-on', k === step));
-  document.getElementById('main').innerHTML =
-    [stOverview, stReview][step]();
-  document.getElementById('main').scrollTop = 0;
-  document.getElementById('stagelbl').textContent = `Stage ${step + 1} of ${STEPS.length}`;
-  document.getElementById('acts').innerHTML = step === 0
-    ? `<button class="b b--sec">Close</button><button class="b b--go">Next<i>↗</i></button>`
-    : step === STEPS.length - 1
-      ? `<button class="b b--sec" data-back>Back</button>
-         <button class="b b--sec">Regenerate with Agent</button>
-         <button class="b b--go">Approve plan &amp; start build<i>↗</i></button>`
-      : `<button class="b b--sec" data-back>Back</button><button class="b b--go">Next<i>↗</i></button>`;
-  const acts = document.getElementById('acts');
-  const back = acts.querySelector('[data-back]');
-  if (back) back.onclick = () => go(step - 1);
-  const nxt = acts.querySelector('.b--go');
-  if (nxt && step < STEPS.length - 1) nxt.onclick = () => go(step + 1);
-  wire();
+// What pressing the button will actually do.
+function paintSum() {
+  const sc = P.scopes.find((x) => x[5]) || P.scopes[1];
+  const el2 = document.getElementById('sum');
+  if (el2) el2.innerHTML =
+    `<b>4 stages</b> · 6 review gates · <b>${sc[4].split(' · ')[0]}</b> · playable in ${sc[4].split(' · ')[1].replace('~', '~')}`;
 }
 
 // ── 01 · Overview ─────────────────────────────────────────────────
@@ -219,39 +204,6 @@ function stOverview() {
           ${seg('Session length', P.length, 'len')}
           ${seg('Difficulty', P.difficulty, 'diff')}`)}
       </aside>
-    </div>`;
-}
-
-// ── 02 · Review ───────────────────────────────────────────────────
-function stReview() {
-  const rowOf = (n, name, sum, kind, deliver, gates) => `
-    <section class="blk">
-      <header class="blk__h"><i class="h"></i>${n ? n + ' · ' : ''}${name}</header>
-      <p class="blk__p">${sum}</p>
-      <p class="blk__k">${kind}</p>
-      <label class="inc"><input type="checkbox" checked><span>Included</span></label>
-      <div class="cols">
-        <div><span class="colk">DELIVERABLES</span>
-          <ul>${deliver.map((d) => `<li>${d}</li>`).join('')}</ul></div>
-        <div><span class="colk">REVIEW GATE</span>
-          <ul>${gates.map((g) => `<li>${g}</li>`).join('')}</ul></div>
-      </div>
-    </section>`;
-  return `
-    <div class="wide">
-      ${band('READY FOR YOUR CHECKPOINT · ' + esc(P.title), '')}
-      <p class="blk__p blk__p--top">${esc(P.promise)}</p>
-      <p class="blk__p">4 build stages · 6 success checks</p>
-      <div class="shot shot--flat">
-        <span class="shot__alt">${esc(P.title)} review cover</span>
-      </div>
-      <button class="wideb">Retry AI cover</button>
-      <p class="blk__p">Could not generate the cover. Please retry.</p>
-
-      ${band('BUILD STAGES', 'Stretch items stay optional. Disabled stages are not sent.')}
-      ${P.stretch.map(([n]) => rowOf('', n, 'Included when the build scope can carry it.',
-        'Optional stretch', [], [])).join('')}
-      ${P.stages.map(([n, name, sum, kind, d, g]) => rowOf(n, name, sum, kind, d, g)).join('')}
     </div>`;
 }
 
@@ -321,11 +273,6 @@ function card(title, inner) {
     <div class="sect__b">${inner}</div>
   </section>`;
 }
-function band(title, note) {
-  return `<div class="band"><header class="band__h"><i class="h"></i>${title}</header>${
-    note ? `<p class="band__p">${note}</p>` : ''}</div>`;
-}
-
 function wire() {
   document.querySelectorAll('.pickcard').forEach((b) => {
     b.onclick = () => {
