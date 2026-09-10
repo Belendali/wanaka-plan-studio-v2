@@ -84,8 +84,10 @@ const P = {
            ['Tactical', 'Wider, more readable']],
   tone: [['Energetic', 'Bright, immediate', true], ['Atmospheric', 'Mood leads'],
          ['Playful', 'Loose and expressive']],
-  stagesOn: [['01 Playable foundation'], ['02 World and visual language'],
-             ['03 Game systems'], ['04 Playtest and review']],
+  crewWork: [['Make it playable', 'Movement, start, fail, retry'],
+             ['Build the world', 'The character, the rooms, the goal'],
+             ['Add the rules', 'Checkpoints, hazards, pickups'],
+             ['Playtest it', 'Run it, fix what breaks, check it holds up']],
   knobs: [
     ['Jump forgiveness', 42, 'Strict', 'Generous'],
     ['Hazard density', 55, 'Sparse', 'Gauntlet'],
@@ -276,7 +278,7 @@ function advanced() {
   return `
     <section class="sect adv" id="adv">
       <button class="sect__h adv__h" id="adv-h">
-        <i class="h"></i>ADVANCED<span class="adv__n">9</span><i class="chev"></i>
+        <i class="h"></i>ADVANCED<span class="adv__n">7</span><i class="chev"></i>
       </button>
       <div class="sect__b adv__b">
         ${row('Notes for the crew',
@@ -294,17 +296,15 @@ function advanced() {
               <span class="kn__e"><em>${lo}</em><em>${hi}</em></span>
             </label>`).join('')}`)}
         ${row('Camera feel', segRow(P.camera))}
-        ${row('Emotional tone', segRow(P.tone))}
-        ${row('Feel statement',
-          `<textarea class="ta" rows="2">${esc(P.feelStatement)}</textarea>`)}
         ${row('Library assets', `
           <label class="ck"><input type="checkbox"><span>Let the crew reuse assets from the library</span></label>
           <p class="adv__p">Off by default: the first build is made from scratch, and swapping in library
             assets happens afterwards in Assets, where you can see them in the game.</p>`)}
-        ${row('Build stages', `
-          ${P.stagesOn.map(([n]) => `
-            <label class="ck"><input type="checkbox" checked><span>${n}</span></label>`).join('')}
-          <p class="adv__p">Switching one off removes it from the build.</p>`)}
+        ${row('What the crew will do', `
+          ${P.crewWork.map(([n, d], i) => `
+            <label class="ck ck--two"><input type="checkbox" checked>
+              <span><b>${i + 1}. ${n}</b><em>${d}</em></span></label>`).join('')}
+          <p class="adv__p">All four run by default. Switch one off and the crew skips it.</p>`)}
       </div>
     </section>`;
 }
