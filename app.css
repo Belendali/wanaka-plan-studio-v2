@@ -226,9 +226,12 @@ body{
    The cover no longer stretches the full pane, the genre is picked
    from pictures, and each scope says what you actually get. */
 .split{grid-template-columns:1fr 420px}
-.pane{display:flex;align-items:flex-start;justify-content:center;padding:0 20px 12px 11px}
+/* the whole stage is centred and capped, so a wide screen puts the margin
+   outside the layout instead of leaving a void beside the cover */
+.split{max-width:1400px;margin:0 auto;width:100%}
+.pane{display:flex;align-items:center;justify-content:center;padding:0 26px 12px 16px}
 .shot--art{
-  width:100%;max-width:940px;aspect-ratio:16/9;height:auto;min-height:0;
+  width:100%;max-width:720px;aspect-ratio:16/9;height:auto;min-height:0;
   margin:0;position:relative;overflow:hidden;border-radius:10px;
   border:1px solid rgba(255,255,255,.09);background:#141419;
 }
