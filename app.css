@@ -365,3 +365,11 @@ body{
   content:'';position:absolute;left:4px;top:1px;width:5px;height:8px;
   border-right:2px solid #07120F;border-bottom:2px solid #07120F;transform:rotate(42deg);
 }
+
+/* the title sits with the brand; the crew holds the right edge */
+.ws__doc{
+  flex:1;min-width:0;font-size:13px;color:var(--ink-2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.ws__faces img{width:30px;height:30px;margin-left:-8px;border-width:2px}
+.ws__x{display:none}
