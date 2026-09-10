@@ -125,10 +125,10 @@ function sv(inner) {
          'stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">' + inner + '</svg>';
 }
 
-// Visual style and render quality moved into Overview, so the panel is four
-// stages rather than five.
-const STEPS = [['01', 'Overview'], ['02', 'World & assets'],
-               ['03', 'Player feel'], ['04', 'Review']];
+// Visual style folded into Overview, and asset picking left the plan entirely:
+// the first build is made by the crew, and swapping in library assets happens
+// afterwards, in the Assets tab, where you can see the thing in the game.
+const STEPS = [['01', 'Overview'], ['02', 'Player feel'], ['03', 'Review']];
 const CREW = ['planner', 'artist', 'developer', 'tester', 'marketing'];
 
 let step = 0;
@@ -160,7 +160,7 @@ function go(i) {
   step = Math.max(0, Math.min(STEPS.length - 1, i));
   document.querySelectorAll('.st').forEach((b, k) => b.classList.toggle('is-on', k === step));
   document.getElementById('main').innerHTML =
-    [stOverview, stAssets, stFeel, stReview][step]();
+    [stOverview, stFeel, stReview][step]();
   document.getElementById('main').scrollTop = 0;
   document.getElementById('stagelbl').textContent = `Stage ${step + 1} of ${STEPS.length}`;
   document.getElementById('acts').innerHTML = step === 0
@@ -209,31 +209,7 @@ function stOverview() {
     </div>`;
 }
 
-// ── 02 · World & assets ───────────────────────────────────────────
-function stAssets() {
-  return `
-    <div class="wide">
-      ${band('ASSET CONTRACT · Pick the ingredients before the build',
-             'Search the live catalog and lock real alternatives into the plan.')}
-      ${P.slots.map(([n, kind, name, need, brief, kindLabel, query, srcs]) => `
-        <section class="blk">
-          <header class="blk__h"><i class="h"></i>${n} · ${kind} · ${name}</header>
-          <p class="blk__p">${need}</p>
-          <div class="chips">${srcs.map((s, i) =>
-            `<button class="chip${i === 0 ? ' is-on' : ''}">${s}</button>`).join('')}</div>
-          <div class="choose">Choose</div>
-          <p class="blk__b">${brief}</p>
-          <p class="blk__k">${kindLabel}</p>
-          <p class="blk__s"><i class="spin"></i>Searching Wanaka and external catalogs...</p>
-          <div class="qrow">
-            <input class="inp inp--q" value="${query}">
-            <span class="qstate">Searching...</span>
-          </div>
-        </section>`).join('')}
-    </div>`;
-}
-
-// ── 03 · Player feel ──────────────────────────────────────────────
+// ── 02 · Player feel ──────────────────────────────────────────────
 function stFeel() {
   return `
     <div class="wide">
@@ -266,7 +242,7 @@ function stFeel() {
     </div>`;
 }
 
-// ── 04 · Review ───────────────────────────────────────────────────
+// ── 03 · Review ───────────────────────────────────────────────────
 function stReview() {
   const rowOf = (n, name, sum, kind, deliver, gates) => `
     <section class="blk">
@@ -285,8 +261,7 @@ function stReview() {
     <div class="wide">
       ${band('READY FOR YOUR CHECKPOINT · ' + esc(P.title), '')}
       <p class="blk__p blk__p--top">${esc(P.promise)}</p>
-      <p class="blk__p">4 build stages · 5 asset decisions · 5 unresolved slots · 6 success checks</p>
-      <button class="wideb">Auto-fill unresolved with top result</button>
+      <p class="blk__p">4 build stages · 6 success checks</p>
       <div class="shot shot--flat">
         <span class="shot__alt">${esc(P.title)} review cover</span>
       </div>
