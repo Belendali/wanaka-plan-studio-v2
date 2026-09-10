@@ -34,13 +34,25 @@ const P = {
   genre: 'Adventure',
   promise: 'A tiny toy-sized girl explores a giant wooden dollhouse to collect scattered puzzle pieces and complete the story puzzle.',
   fantasy: 'Feel small and curious, discovering hidden treasures inside a cozy, oversized toy world',
-  refNote: 'Traverse a readable 3D course, recover from falls, and reach a goal.',
-  refs: [
-    ['Precision course', 'Measured jumps, moving platforms, and a clear flag.'],
-    ['Collectathon course',
-     'Hub rooms connected by short traversal · Required pickup count before the exit opens · A camera that keeps the next pickup readable · Safe return after a fall', true],
+  cover: 'assets/cover-girl.jpg',
+  // the genre decides what game this is, so it is a picture decision
+  genres: [
+    ['adventure', 'Adventure', 'Explore a world and find your way through', true],
+    ['platformer', 'Platformer', 'Jump, land, and time your moves'],
+    ['puzzle', 'Puzzle', 'Work out the answer, then pull it off'],
+    ['collect', 'Collectathon', 'Sweep a place clean of things worth having'],
+    ['racing', 'Racing', 'Get there first, or beat the clock'],
+    ['action', 'Action', 'React fast, keep yourself alive'],
   ],
-  scopes: [['Slice'], ['Standard', true], ['Ambitious']],
+  // each scope says what you get, not just how large it is
+  scopes: [
+    ['slice', 'Slice', 'One room, one puzzle — a demo that proves the feel.',
+     '1 room · 3 assets', '180–260 credits · ~6 min'],
+    ['standard', 'Standard', 'The whole course, from the first step to the goal.',
+     '4 rooms · 6 assets', '320–560 credits · ~12 min', true],
+    ['ambitious', 'Ambitious', 'Extra rooms, optional paths, and a polish pass.',
+     '7 rooms · 11 assets', '640–980 credits · ~25 min'],
+  ],
   styles: [
     ['default', 'Default'], ['realistic', 'Realistic'], ['toon', 'Stylized Toon', true],
     ['graphic-ink', 'Graphic Ink'], ['ink-wash', 'Ink Wash'], ['pixel', 'Pixel Screen'],
@@ -95,6 +107,23 @@ const P = {
       'Optional collectibles and hazards are tested only when the course uses them.']],
   ],
 };
+
+// Small marks, so a genre or a scope reads before the words do.
+const ICON = {
+  adventure: sv('<path d="M3 15l4-9 4 6 3-4 3 7z"/><circle cx="13.5" cy="4.5" r="1.6"/>'),
+  platformer: sv('<rect x="1.5" y="12.5" width="6" height="2.2" rx="1.1"/><rect x="10.5" y="8.5" width="6" height="2.2" rx="1.1"/><circle cx="4.5" cy="8.5" r="2.2"/>'),
+  puzzle: sv('<path d="M3 3h5v2.2a1.6 1.6 0 103.2 0V3H15v5h-2.2a1.6 1.6 0 100 3.2H15V15h-5v-2.2a1.6 1.6 0 10-3.2 0V15H3z"/>'),
+  collect: sv('<circle cx="5" cy="5.5" r="2.3"/><circle cx="12.5" cy="7" r="2.3"/><circle cx="7.5" cy="12.5" r="2.3"/><circle cx="13.5" cy="13" r="1.6"/>'),
+  racing: sv('<path d="M2 11.5h14M4.5 11.5a2 2 0 104 0M10 11.5a2 2 0 104 0"/><path d="M3.5 11.5l2-4h7l2 4"/>'),
+  action: sv('<path d="M9.5 1.5L4 10h4l-1.5 6.5L14 8h-4z"/>'),
+  slice: sv('<rect x="2.5" y="5.5" width="6" height="7" rx="1.4"/>'),
+  standard: sv('<rect x="1.5" y="5.5" width="5" height="7" rx="1.4"/><rect x="7.5" y="5.5" width="5" height="7" rx="1.4"/><rect x="13.5" y="5.5" width="3" height="7" rx="1.4"/>'),
+  ambitious: sv('<rect x="1.5" y="7.5" width="4" height="5" rx="1.2"/><rect x="6.5" y="4.5" width="4" height="8" rx="1.2"/><rect x="11.5" y="6" width="4" height="6.5" rx="1.2"/><path d="M13.2 1l.7 1.6 1.7.2-1.3 1.2.4 1.7-1.5-.9-1.5.9.4-1.7-1.3-1.2 1.7-.2z"/>'),
+};
+function sv(inner) {
+  return '<svg class="ic" viewBox="0 0 18 18" fill="none" stroke="currentColor" ' +
+         'stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">' + inner + '</svg>';
+}
 
 const STEPS = [['01', 'Overview'], ['02', 'Game vision'], ['03', 'World & assets'],
                ['04', 'Player feel'], ['05', 'Review']];
@@ -152,29 +181,35 @@ function stOverview() {
   return `
     <div class="split">
       <section class="pane">
-        <div class="shot">
-          <span class="shot__alt">${esc(P.title)} AI cover</span>
+        <figure class="shot shot--art">
+          <img src="${P.cover}" alt="">
           <button class="shot__retry">Retry cover</button>
-        </div>
+        </figure>
       </section>
       <aside class="rail">
         ${card('GAME INFORMATION', `
           <label class="lbl">Game title</label>
           <input class="inp" value="${esc(P.title)}">
-          <label class="lbl">Genre</label>
-          <select class="sel">
-            <option>Adventure</option><option>Platformer</option><option>Puzzle</option>
-          </select>
-          <label class="lbl">Playable promise</label>
-          <textarea class="ta ta--short">${esc(P.promise)}</textarea>
-          <label class="lbl">Player fantasy</label>
+          <label class="lbl">Core gameplay</label>
+          <textarea class="ta ta--tall">${esc(P.promise)}</textarea>
+          <label class="lbl">Player experience</label>
           <textarea class="ta">${esc(P.fantasy)}</textarea>`)}
-        ${card('REFERENCE', `
-          <p class="note">${P.refNote}</p>
-          ${P.refs.map(([n, d, on]) => `
-            <button class="pickcard${on ? ' is-on' : ''}"><b>${n}</b><span>${d}</span></button>`).join('')}`)}
-        ${card('BUILD SCOPE', P.scopes.map(([n, on]) =>
-          `<button class="pickcard pickcard--row${on ? ' is-on' : ''}"><b>${n}</b></button>`).join(''))}
+        ${card('GENRE', `
+          <p class="note">What kind of game this is. It decides how everything else gets built.</p>
+          <div class="genres">
+            ${P.genres.map(([k, n, d, on]) => `
+              <button class="gen${on ? ' is-on' : ''}" data-k="${k}">
+                ${ICON[k]}<b>${n}</b><span>${d}</span>
+              </button>`).join('')}
+          </div>`)}
+        ${card('BUILD SCOPE', `
+          <p class="note">How much gets built before you can play it.</p>
+          ${P.scopes.map(([k, n, d, what, cost, on]) => `
+            <button class="scope${on ? ' is-on' : ''}" data-k="${k}">
+              ${ICON[k]}
+              <span class="scope__t"><b>${n}</b><span>${d}</span>
+                <em>${what}<i>${cost}</i></em></span>
+            </button>`).join('')}`)}
       </aside>
     </div>`;
 }
@@ -336,6 +371,13 @@ function wire() {
       };
     });
   }
+  document.querySelectorAll('.gen, .scope').forEach((b) => {
+    b.onclick = () => {
+      const sel = b.classList.contains('gen') ? '.gen' : '.scope';
+      b.parentElement.querySelectorAll(sel).forEach((o) => o.classList.remove('is-on'));
+      b.classList.add('is-on');
+    };
+  });
   document.querySelectorAll('.chip').forEach((c) => {
     c.onclick = () => {
       c.parentElement.querySelectorAll('.chip').forEach((o) => o.classList.remove('is-on'));

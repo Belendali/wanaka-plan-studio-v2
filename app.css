@@ -221,3 +221,52 @@ body{
 }
 .b--go i{font-style:normal;opacity:.55}
 .b--go:hover{filter:brightness(1.04)}
+
+/* ── Stage 01, reworked ───────────────────────────────────────────
+   The cover no longer stretches the full pane, the genre is picked
+   from pictures, and each scope says what you actually get. */
+.split{grid-template-columns:1fr 420px}
+.pane{display:flex;align-items:flex-start;justify-content:center;padding:0 20px 12px 11px}
+.shot--art{
+  width:100%;max-width:940px;aspect-ratio:16/9;height:auto;min-height:0;
+  margin:0;position:relative;overflow:hidden;border-radius:10px;
+  border:1px solid rgba(255,255,255,.09);background:#141419;
+}
+.shot--art img{width:100%;height:100%;object-fit:cover;display:block}
+
+.ic{width:18px;height:18px;flex:none;display:block}
+
+/* genre — six cards with a mark, so it reads before the words do */
+.genres{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gen{
+  display:flex;flex-direction:column;gap:4px;padding:10px;border-radius:8px;cursor:pointer;
+  background:var(--card);border:0;box-shadow:0 0 0 1px var(--line);text-align:left;
+  font-family:var(--font);color:var(--ink);transition:box-shadow .16s,background .16s;
+}
+.gen .ic{color:var(--ink-3);margin-bottom:2px}
+.gen b{font-size:13px;font-weight:600}
+.gen span{font-size:11.5px;line-height:1.4;color:var(--ink-2)}
+.gen:hover{box-shadow:0 0 0 1px var(--ring)}
+.gen.is-on{background:rgba(127,227,192,.07);box-shadow:0 0 0 1px var(--mint)}
+.gen.is-on .ic{color:var(--mint)}
+
+/* scope — the mark shows how much, the lines say what and what it costs */
+.scope{
+  display:flex;gap:11px;padding:11px 12px;border-radius:8px;cursor:pointer;width:100%;
+  background:var(--card);border:0;box-shadow:0 0 0 1px var(--line);text-align:left;
+  font-family:var(--font);color:var(--ink);transition:box-shadow .16s,background .16s;
+}
+.scope .ic{color:var(--ink-3);margin-top:2px}
+.scope__t{display:flex;flex-direction:column;gap:3px;min-width:0}
+.scope__t b{font-size:13px;font-weight:600}
+.scope__t>span{font-size:12px;line-height:1.45;color:var(--ink-2)}
+.scope__t em{
+  font-style:normal;display:flex;justify-content:space-between;gap:10px;margin-top:2px;
+  font-size:11px;color:var(--ink-3);
+}
+.scope__t i{font-style:normal;color:var(--ink-2)}
+.scope:hover{box-shadow:0 0 0 1px var(--ring)}
+.scope.is-on{background:rgba(127,227,192,.07);box-shadow:0 0 0 1px var(--mint)}
+.scope.is-on .ic{color:var(--mint)}
+
+.ta--tall{min-height:86px}
