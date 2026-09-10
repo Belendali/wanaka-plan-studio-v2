@@ -345,3 +345,5 @@ body{
 .sg:hover{color:var(--ink)}
 .sg.is-on{background:rgba(127,227,192,.14);color:var(--mint)}
 .seg__n{font-size:11px;color:var(--ink-3)}
+/* platform is a toggle pair, not a pick-one */
+.seg--multi .sg.is-on{background:rgba(127,227,192,.14);color:var(--mint);font-weight:500}

@@ -68,6 +68,7 @@ const P = {
     ['03', 'audio', 'Theme audio', 'A short loop that matches the session length',
      'A short loop that matches the session length', 'Audio', 'music loop', ['Wanaka', 'Freesound']],
   ],
+  platforms: [['Web', 'web', true], ['Mobile', 'mobile', true]],
   length: [['3–5 min', 'Fast retries, quick payoff'],
            ['8–12 min', 'Room for mastery and an arc', true],
            ['15–20 min', 'A longer run with varied beats']],
@@ -201,6 +202,7 @@ function stOverview() {
               <span class="scope__more"><span>${d}</span>
                 <em>${what}<i>${cost}</i></em></span>
             </button>`).join('')}
+          ${multi('Platform', P.platforms)}
           ${seg('Session length', P.length, 'len')}
           ${seg('Difficulty', P.difficulty, 'diff')}`)}
       </aside>
@@ -250,6 +252,20 @@ function styleField() {
             <button class="q${on ? ' is-on' : ''}">${n}</button>`).join('')}
         </div>
       </div>
+    </div>`;
+}
+
+// Platform can be both at once, so it toggles rather than picks. One has to
+// stay on — a build with no target is not a build.
+function multi(label, opts) {
+  return `
+    <div class="seg seg--multi" id="plat">
+      <span class="seg__k">${label}</span>
+      <div class="seg__row">
+        ${opts.map(([n, k, on]) => `
+          <button class="sg${on ? ' is-on' : ''}" data-k="${k}">${n}</button>`).join('')}
+      </div>
+      <span class="seg__n" id="plat-note">Built for web and mobile</span>
     </div>`;
 }
 
@@ -328,7 +344,20 @@ function wire() {
       };
     });
   }
-  document.querySelectorAll('.seg').forEach((g) => {
+  const plat = document.getElementById('plat');
+  if (plat) {
+    const note = document.getElementById('plat-note');
+    plat.querySelectorAll('.sg').forEach((b) => {
+      b.onclick = () => {
+        const on = plat.querySelectorAll('.sg.is-on');
+        if (b.classList.contains('is-on') && on.length === 1) return;   // keep one target
+        b.classList.toggle('is-on');
+        const picked = [...plat.querySelectorAll('.sg.is-on')].map((x) => x.dataset.k);
+        note.textContent = 'Built for ' + (picked.length === 2 ? 'web and mobile' : picked[0]);
+      };
+    });
+  }
+  document.querySelectorAll('.seg:not(.seg--multi)').forEach((g) => {
     const note = g.querySelector('.seg__n');
     g.querySelectorAll('.sg').forEach((b) => {
       b.onclick = () => {
