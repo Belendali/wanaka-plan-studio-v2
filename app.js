@@ -259,11 +259,13 @@ function styleField() {
 // stay on — a build with no target is not a build.
 function multi(label, opts) {
   return `
-    <div class="seg seg--multi" id="plat">
+    <div class="seg" id="plat">
       <span class="seg__k">${label}</span>
-      <div class="seg__row">
+      <div class="plats">
         ${opts.map(([n, k, on]) => `
-          <button class="sg${on ? ' is-on' : ''}" data-k="${k}">${n}</button>`).join('')}
+          <button class="plat${on ? ' is-on' : ''}" data-k="${k}">
+            <i class="box"></i>${n}
+          </button>`).join('')}
       </div>
       <span class="seg__n" id="plat-note">Built for web and mobile</span>
     </div>`;
@@ -347,17 +349,17 @@ function wire() {
   const plat = document.getElementById('plat');
   if (plat) {
     const note = document.getElementById('plat-note');
-    plat.querySelectorAll('.sg').forEach((b) => {
+    plat.querySelectorAll('.plat').forEach((b) => {
       b.onclick = () => {
-        const on = plat.querySelectorAll('.sg.is-on');
+        const on = plat.querySelectorAll('.plat.is-on');
         if (b.classList.contains('is-on') && on.length === 1) return;   // keep one target
         b.classList.toggle('is-on');
-        const picked = [...plat.querySelectorAll('.sg.is-on')].map((x) => x.dataset.k);
+        const picked = [...plat.querySelectorAll('.plat.is-on')].map((x) => x.dataset.k);
         note.textContent = 'Built for ' + (picked.length === 2 ? 'web and mobile' : picked[0]);
       };
     });
   }
-  document.querySelectorAll('.seg:not(.seg--multi)').forEach((g) => {
+  document.querySelectorAll('.seg:not(#plat)').forEach((g) => {
     const note = g.querySelector('.seg__n');
     g.querySelectorAll('.sg').forEach((b) => {
       b.onclick = () => {

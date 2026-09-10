@@ -345,5 +345,23 @@ body{
 .sg:hover{color:var(--ink)}
 .sg.is-on{background:rgba(127,227,192,.14);color:var(--mint)}
 .seg__n{font-size:11px;color:var(--ink-3)}
-/* platform is a toggle pair, not a pick-one */
-.seg--multi .sg.is-on{background:rgba(127,227,192,.14);color:var(--mint);font-weight:500}
+/* Platform is a pair of independent switches, so it must not look like the
+   pick-one strips above it: separate pills, each with its own box. */
+.plats{display:flex;gap:8px}
+.plat{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:8px 10px;border-radius:8px;cursor:pointer;
+  background:var(--card);border:0;box-shadow:0 0 0 1px var(--line);
+  font-family:var(--font);font-size:12.5px;color:var(--ink-3);transition:all .16s;
+}
+.box{
+  width:14px;height:14px;flex:none;border-radius:4px;position:relative;
+  border:1px solid var(--line-2);transition:all .16s;
+}
+.plat:hover{color:var(--ink);box-shadow:0 0 0 1px var(--ring)}
+.plat.is-on{background:rgba(127,227,192,.08);box-shadow:0 0 0 1px var(--mint);color:var(--ink)}
+.plat.is-on .box{background:var(--mint);border-color:transparent}
+.plat.is-on .box::after{
+  content:'';position:absolute;left:4px;top:1px;width:5px;height:8px;
+  border-right:2px solid #07120F;border-bottom:2px solid #07120F;transform:rotate(42deg);
+}
