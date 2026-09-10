@@ -190,26 +190,18 @@ function stOverview() {
         ${card('GAME INFORMATION', `
           <label class="lbl">Game title</label>
           <input class="inp" value="${esc(P.title)}">
+          <label class="lbl">Genre</label>
+          ${genreField()}
           <label class="lbl">Core gameplay</label>
           <textarea class="ta ta--tall">${esc(P.promise)}</textarea>
           <label class="lbl">Player experience</label>
           <textarea class="ta">${esc(P.fantasy)}</textarea>`)}
-        ${card('GENRE', `
-          <p class="note">What kind of game this is. It decides how everything else gets built.</p>
-          <div class="genres">
-            ${P.genres.map(([k, n, d, on]) => `
-              <button class="gen${on ? ' is-on' : ''}" data-k="${k}">
-                ${ICON[k]}<b>${n}</b><span>${d}</span>
-              </button>`).join('')}
-          </div>`)}
-        ${card('BUILD SCOPE', `
-          <p class="note">How much gets built before you can play it.</p>
-          ${P.scopes.map(([k, n, d, what, cost, on]) => `
+        ${card('BUILD SCOPE', P.scopes.map(([k, n, d, what, cost, on]) => `
             <button class="scope${on ? ' is-on' : ''}" data-k="${k}">
-              ${ICON[k]}
-              <span class="scope__t"><b>${n}</b><span>${d}</span>
+              <span class="scope__hd">${ICON[k]}<b>${n}</b></span>
+              <span class="scope__more"><span>${d}</span>
                 <em>${what}<i>${cost}</i></em></span>
-            </button>`).join('')}`)}
+            </button>`).join(''))}
       </aside>
     </div>`;
 }
@@ -339,6 +331,25 @@ function stReview() {
 }
 
 // ── Bits ──────────────────────────────────────────────────────────
+// Genre sits where it shipped — second in Game information — but it opens
+// into six marked options, and each explains itself only on hover.
+function genreField() {
+  const cur = P.genres.find((g) => g[3]) || P.genres[0];
+  return `
+    <div class="gpick" id="gpick">
+      <button class="gpick__now" id="gpick-now">
+        ${ICON[cur[0]]}<b>${cur[1]}</b><i class="chev"></i>
+      </button>
+      <div class="gpick__list">
+        ${P.genres.map(([k, n, d, on]) => `
+          <button class="gen${on ? ' is-on' : ''}" data-k="${k}" data-n="${n}">
+            <span class="gen__hd">${ICON[k]}<b>${n}</b></span>
+            <span class="gen__more">${d}</span>
+          </button>`).join('')}
+      </div>
+    </div>`;
+}
+
 function card(title, inner) {
   return `<section class="sect">
     <header class="sect__h"><i class="h"></i>${title}</header>
@@ -371,10 +382,22 @@ function wire() {
       };
     });
   }
-  document.querySelectorAll('.gen, .scope').forEach((b) => {
+  const gp = document.getElementById('gpick');
+  if (gp) {
+    document.getElementById('gpick-now').onclick = () => gp.classList.toggle('is-open');
+    gp.querySelectorAll('.gen').forEach((b) => {
+      b.onclick = () => {
+        gp.querySelectorAll('.gen').forEach((o) => o.classList.remove('is-on'));
+        b.classList.add('is-on');
+        const now = document.getElementById('gpick-now');
+        now.innerHTML = b.querySelector('.gen__hd').innerHTML + '<i class="chev"></i>';
+        gp.classList.remove('is-open');
+      };
+    });
+  }
+  document.querySelectorAll('.scope').forEach((b) => {
     b.onclick = () => {
-      const sel = b.classList.contains('gen') ? '.gen' : '.scope';
-      b.parentElement.querySelectorAll(sel).forEach((o) => o.classList.remove('is-on'));
+      b.parentElement.querySelectorAll('.scope').forEach((o) => o.classList.remove('is-on'));
       b.classList.add('is-on');
     };
   });
