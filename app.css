@@ -332,3 +332,16 @@ body{
 }
 .q:hover{color:var(--ink)}
 .q.is-on{background:rgba(127,227,192,.14);color:var(--mint)}
+
+/* ── Session length and difficulty: one strip each ───────────────
+   These replace four engine sliders nobody can judge before playing. */
+.seg{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.seg__k{font-size:12px;color:var(--ink-2)}
+.seg__row{display:flex;background:var(--field);border:1px solid var(--line);border-radius:7px;padding:2px}
+.sg{
+  flex:1;padding:6px 0;border:0;border-radius:5px;cursor:pointer;background:none;
+  font-family:var(--font);font-size:12px;color:var(--ink-3);
+}
+.sg:hover{color:var(--ink)}
+.sg.is-on{background:rgba(127,227,192,.14);color:var(--mint)}
+.seg__n{font-size:11px;color:var(--ink-3)}

@@ -68,6 +68,12 @@ const P = {
     ['03', 'audio', 'Theme audio', 'A short loop that matches the session length',
      'A short loop that matches the session length', 'Audio', 'music loop', ['Wanaka', 'Freesound']],
   ],
+  length: [['3–5 min', 'Fast retries, quick payoff'],
+           ['8–12 min', 'Room for mastery and an arc', true],
+           ['15–20 min', 'A longer run with varied beats']],
+  difficulty: [['Gentle', 'Forgiving landings, few hazards'],
+               ['Normal', 'Fair, with room to fail', true],
+               ['Tough', 'Tight timing, real pressure']],
   knobs: [
     ['Jump forgiveness', 42, 'Strict', 'Generous'],
     ['Hazard density', 55, 'Sparse', 'Gauntlet'],
@@ -128,7 +134,11 @@ function sv(inner) {
 // Visual style folded into Overview, and asset picking left the plan entirely:
 // the first build is made by the crew, and swapping in library assets happens
 // afterwards, in the Assets tab, where you can see the thing in the game.
-const STEPS = [['01', 'Overview'], ['02', 'Player feel'], ['03', 'Review']];
+// Player feel left the plan too: its four sliders are engine tuning nobody can
+// judge before playing, and its prose said what Core gameplay already says.
+// Session length and difficulty — the parts a person has an opinion on — move
+// into Overview beside the scope.
+const STEPS = [['01', 'Overview'], ['02', 'Review']];
 const CREW = ['planner', 'artist', 'developer', 'tester', 'marketing'];
 
 let step = 0;
@@ -160,7 +170,7 @@ function go(i) {
   step = Math.max(0, Math.min(STEPS.length - 1, i));
   document.querySelectorAll('.st').forEach((b, k) => b.classList.toggle('is-on', k === step));
   document.getElementById('main').innerHTML =
-    [stOverview, stFeel, stReview][step]();
+    [stOverview, stReview][step]();
   document.getElementById('main').scrollTop = 0;
   document.getElementById('stagelbl').textContent = `Stage ${step + 1} of ${STEPS.length}`;
   document.getElementById('acts').innerHTML = step === 0
@@ -199,50 +209,20 @@ function stOverview() {
           <label class="lbl">Player experience</label>
           <textarea class="ta">${esc(P.fantasy)}</textarea>`)}
         ${card('VISUAL STYLE', styleField())}
-        ${card('BUILD SCOPE', P.scopes.map(([k, n, d, what, cost, on]) => `
+        ${card('BUILD SCOPE', `
+          ${P.scopes.map(([k, n, d, what, cost, on]) => `
             <button class="scope${on ? ' is-on' : ''}" data-k="${k}">
               <span class="scope__hd">${ICON[k]}<b>${n}</b></span>
               <span class="scope__more"><span>${d}</span>
                 <em>${what}<i>${cost}</i></em></span>
-            </button>`).join(''))}
+            </button>`).join('')}
+          ${seg('Session length', P.length, 'len')}
+          ${seg('Difficulty', P.difficulty, 'diff')}`)}
       </aside>
     </div>`;
 }
 
-// ── 02 · Player feel ──────────────────────────────────────────────
-function stFeel() {
-  return `
-    <div class="wide">
-      ${band('PLAYER FEEL · Tune the game before code hardens',
-             'These values are sent as explicit implementation constraints.')}
-      <div class="knobs4">
-        ${P.knobs.map(([n, v, lo, hi, plain]) => `
-          <div class="knob">
-            <span class="knob__t">${n}<b>${plain ? v : v + '%'}</b></span>
-            <input type="range" min="0" max="100" value="${plain ? v * 8 : v}">
-            <span class="knob__e"><em>${lo}</em><em>${hi}</em></span>
-          </div>`).join('')}
-      </div>
-      ${band('FEELING · Design prose, not a typed assertion',
-             'Tone, camera, and session length guide taste. They are not numeric constraints.')}
-      <div class="blk blk--flat">
-        <label class="lbl">Feel statement</label>
-        <textarea class="ta ta--wide">${esc(P.feelStatement)}</textarea>
-      </div>
-      ${band('PERSONALITY · Make the experience yours', '')}
-      ${P.personality.map(([t, note, opts]) => `
-        <section class="blk">
-          <header class="blk__h"><i class="h"></i>${t}</header>
-          <p class="blk__p">${note}</p>
-          <div class="grid3">
-            ${opts.map(([n, d, on]) => `
-              <button class="pickcard${on ? ' is-on' : ''}"><b>${n}</b><span>${d}</span></button>`).join('')}
-          </div>
-        </section>`).join('')}
-    </div>`;
-}
-
-// ── 03 · Review ───────────────────────────────────────────────────
+// ── 02 · Review ───────────────────────────────────────────────────
 function stReview() {
   const rowOf = (n, name, sum, kind, deliver, gates) => `
     <section class="blk">
@@ -272,7 +252,6 @@ function stReview() {
       ${P.stretch.map(([n]) => rowOf('', n, 'Included when the build scope can carry it.',
         'Optional stretch', [], [])).join('')}
       ${P.stages.map(([n, name, sum, kind, d, g]) => rowOf(n, name, sum, kind, d, g)).join('')}
-      ${band('KNOBS AND FEEL', '')}
     </div>`;
 }
 
@@ -319,6 +298,20 @@ function styleField() {
             <button class="q${on ? ' is-on' : ''}">${n}</button>`).join('')}
         </div>
       </div>
+    </div>`;
+}
+
+// A labelled strip of three, for the two questions a person actually has an
+// opinion about. The engine numbers behind them are the crew's problem.
+function seg(label, opts, key) {
+  return `
+    <div class="seg" data-seg="${key}">
+      <span class="seg__k">${label}</span>
+      <div class="seg__row">
+        ${opts.map(([n, d, on]) => `
+          <button class="sg${on ? ' is-on' : ''}" title="${d}">${n}</button>`).join('')}
+      </div>
+      <span class="seg__n">${(opts.find((o) => o[2]) || opts[0])[1]}</span>
     </div>`;
 }
 
@@ -388,6 +381,16 @@ function wire() {
       };
     });
   }
+  document.querySelectorAll('.seg').forEach((g) => {
+    const note = g.querySelector('.seg__n');
+    g.querySelectorAll('.sg').forEach((b) => {
+      b.onclick = () => {
+        g.querySelectorAll('.sg').forEach((o) => o.classList.remove('is-on'));
+        b.classList.add('is-on');
+        note.textContent = b.title;
+      };
+    });
+  });
   document.querySelectorAll('.scope').forEach((b) => {
     b.onclick = () => {
       b.parentElement.querySelectorAll('.scope').forEach((o) => o.classList.remove('is-on'));
