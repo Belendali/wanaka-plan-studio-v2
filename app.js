@@ -59,7 +59,7 @@ const P = {
     ['crosshatch', 'Crosshatch'], ['one-bit', 'One-Bit'], ['phosphor', 'Phosphor'],
     ['retro-warm', 'Retro Warm'], ['horror', 'Horror'],
   ],
-  quality: [['Performance'], ['Balanced', true], ['Fidelity']],
+  quality: [['Low'], ['Medium'], ['High', true], ['Ultra'], ['Cinematic']],
   slots: [
     ['01', '3d', 'Hero asset', 'The object the player identifies with immediately.',
      'A readable hero with a strong silhouette', '3D', 'character', ['Wanaka', 'Poly Haven', 'Sketchfab']],
@@ -125,8 +125,10 @@ function sv(inner) {
          'stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">' + inner + '</svg>';
 }
 
-const STEPS = [['01', 'Overview'], ['02', 'Game vision'], ['03', 'World & assets'],
-               ['04', 'Player feel'], ['05', 'Review']];
+// Visual style and render quality moved into Overview, so the panel is four
+// stages rather than five.
+const STEPS = [['01', 'Overview'], ['02', 'World & assets'],
+               ['03', 'Player feel'], ['04', 'Review']];
 const CREW = ['planner', 'artist', 'developer', 'tester', 'marketing'];
 
 let step = 0;
@@ -155,15 +157,15 @@ function mount() {
 }
 
 function go(i) {
-  step = Math.max(0, Math.min(4, i));
+  step = Math.max(0, Math.min(STEPS.length - 1, i));
   document.querySelectorAll('.st').forEach((b, k) => b.classList.toggle('is-on', k === step));
   document.getElementById('main').innerHTML =
-    [stOverview, stVision, stAssets, stFeel, stReview][step]();
+    [stOverview, stAssets, stFeel, stReview][step]();
   document.getElementById('main').scrollTop = 0;
-  document.getElementById('stagelbl').textContent = `Stage ${step + 1} of 5`;
+  document.getElementById('stagelbl').textContent = `Stage ${step + 1} of ${STEPS.length}`;
   document.getElementById('acts').innerHTML = step === 0
     ? `<button class="b b--sec">Close</button><button class="b b--go">Next<i>↗</i></button>`
-    : step === 4
+    : step === STEPS.length - 1
       ? `<button class="b b--sec" data-back>Back</button>
          <button class="b b--sec">Regenerate with Agent</button>
          <button class="b b--go">Approve plan &amp; start build<i>↗</i></button>`
@@ -172,7 +174,7 @@ function go(i) {
   const back = acts.querySelector('[data-back]');
   if (back) back.onclick = () => go(step - 1);
   const nxt = acts.querySelector('.b--go');
-  if (nxt && step < 4) nxt.onclick = () => go(step + 1);
+  if (nxt && step < STEPS.length - 1) nxt.onclick = () => go(step + 1);
   wire();
 }
 
@@ -182,7 +184,7 @@ function stOverview() {
     <div class="split">
       <section class="pane">
         <figure class="shot shot--art">
-          <img src="${P.cover}" alt="">
+          <img src="assets/cover-${P.styles.find((x) => x[2])[0]}.jpg" alt="" id="cover">
           <button class="shot__retry">Retry cover</button>
         </figure>
       </section>
@@ -196,6 +198,7 @@ function stOverview() {
           <textarea class="ta ta--tall">${esc(P.promise)}</textarea>
           <label class="lbl">Player experience</label>
           <textarea class="ta">${esc(P.fantasy)}</textarea>`)}
+        ${card('VISUAL STYLE', styleField())}
         ${card('BUILD SCOPE', P.scopes.map(([k, n, d, what, cost, on]) => `
             <button class="scope${on ? ' is-on' : ''}" data-k="${k}">
               <span class="scope__hd">${ICON[k]}<b>${n}</b></span>
@@ -206,39 +209,7 @@ function stOverview() {
     </div>`;
 }
 
-// ── 02 · Game vision ──────────────────────────────────────────────
-function stVision() {
-  const cur = P.styles.find((s) => s[2]) || P.styles[0];
-  return `
-    <div class="split">
-      <section class="pane">
-        <div class="preview">
-          <img src="assets/style-${cur[0]}.jpg" alt="" id="pv">
-          <div class="tip" id="tip">
-            <b>${cur[1]}</b>
-            <em>${cur[1]} (cel shading, ink outlines)</em>
-            <em>Palette applies in build</em>
-          </div>
-        </div>
-      </section>
-      <aside class="rail">
-        ${card('VISUAL STYLE', `
-          <p class="note">Pick a registered Visual Profile. The preview follows the selection.</p>
-          <div class="grid2" id="styles">
-            ${P.styles.map(([k, n, on]) => `
-              <button class="sty${on ? ' is-on' : ''}" data-k="${k}" data-n="${esc(n)}">
-                <img src="assets/style-${k}.jpg" alt=""><span>${n}</span>
-              </button>`).join('')}
-          </div>`)}
-        ${card('RENDER QUALITY', `
-          <p class="note">Choose a quality tier. Fine-tuning stays in Project Settings.</p>
-          ${P.quality.map(([n, on]) =>
-            `<button class="pickcard pickcard--row${on ? ' is-on' : ''}"><b>${n}</b></button>`).join('')}`)}
-      </aside>
-    </div>`;
-}
-
-// ── 03 · World & assets ───────────────────────────────────────────
+// ── 02 · World & assets ───────────────────────────────────────────
 function stAssets() {
   return `
     <div class="wide">
@@ -262,7 +233,7 @@ function stAssets() {
     </div>`;
 }
 
-// ── 04 · Player feel ──────────────────────────────────────────────
+// ── 03 · Player feel ──────────────────────────────────────────────
 function stFeel() {
   return `
     <div class="wide">
@@ -295,7 +266,7 @@ function stFeel() {
     </div>`;
 }
 
-// ── 05 · Review ───────────────────────────────────────────────────
+// ── 04 · Review ───────────────────────────────────────────────────
 function stReview() {
   const rowOf = (n, name, sum, kind, deliver, gates) => `
     <section class="blk">
@@ -350,6 +321,32 @@ function genreField() {
     </div>`;
 }
 
+// One block for the look: the current profile, opening to the rest, with the
+// quality tier as a strip underneath.
+function styleField() {
+  const cur = P.styles.find((x) => x[2]) || P.styles[0];
+  return `
+    <div class="spick" id="spick">
+      <button class="spick__now" id="spick-now">
+        <img src="assets/sty-${cur[0]}.jpg" alt="">
+        <b>${cur[1]}</b><i class="chev"></i>
+      </button>
+      <div class="spick__list">
+        ${P.styles.map(([k, n, on]) => `
+          <button class="sty2${on ? ' is-on' : ''}" data-k="${k}" data-n="${n}">
+            <img src="assets/sty-${k}.jpg" alt=""><span>${n}</span>
+          </button>`).join('')}
+      </div>
+      <div class="qual">
+        <span class="qual__k">Render quality</span>
+        <div class="qual__row">
+          ${P.quality.map(([n, on]) => `
+            <button class="q${on ? ' is-on' : ''}">${n}</button>`).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
 function card(title, inner) {
   return `<section class="sect">
     <header class="sect__h"><i class="h"></i>${title}</header>
@@ -392,6 +389,27 @@ function wire() {
         const now = document.getElementById('gpick-now');
         now.innerHTML = b.querySelector('.gen__hd').innerHTML + '<i class="chev"></i>';
         gp.classList.remove('is-open');
+      };
+    });
+  }
+  const sp = document.getElementById('spick');
+  if (sp) {
+    document.getElementById('spick-now').onclick = () => sp.classList.toggle('is-open');
+    sp.querySelectorAll('.sty2').forEach((b) => {
+      b.onclick = () => {
+        sp.querySelectorAll('.sty2').forEach((o) => o.classList.remove('is-on'));
+        b.classList.add('is-on');
+        const now = document.getElementById('spick-now');
+        now.innerHTML = `<img src="assets/sty-${b.dataset.k}.jpg" alt=""><b>${b.dataset.n}</b><i class="chev"></i>`;
+        const cover = document.getElementById('cover');
+        if (cover) cover.src = `assets/cover-${b.dataset.k}.jpg`;
+        sp.classList.remove('is-open');
+      };
+    });
+    sp.querySelectorAll('.q').forEach((b) => {
+      b.onclick = () => {
+        sp.querySelectorAll('.q').forEach((o) => o.classList.remove('is-on'));
+        b.classList.add('is-on');
       };
     });
   }

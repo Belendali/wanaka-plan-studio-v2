@@ -13,7 +13,7 @@
      ?after loads the reworked version, so the two compare in one tab. */
   (function () {
     var after = /(\?|&)after\b/.test(location.search);
-    document.write('<link rel="stylesheet" href="' + (after ? 'after' : 'app') + '.css?v=9">');
+    document.write('<link rel="stylesheet" href="' + (after ? 'after' : 'app') + '.css?v=10">');
     window.__AFTER__ = after;
   })();
 </script>
@@ -23,7 +23,7 @@
 <script>
   (function () {
     var s = document.createElement('script');
-    s.src = (window.__AFTER__ ? 'after' : 'app') + '.js?v=9';
+    s.src = (window.__AFTER__ ? 'after' : 'app') + '.js?v=10';
     document.body.appendChild(s);
   })();
 </script>
