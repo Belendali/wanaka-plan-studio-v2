@@ -75,6 +75,17 @@ const P = {
   difficulty: [['Gentle', 'Forgiving landings, few hazards'],
                ['Normal', 'Fair, with room to fail', true],
                ['Tough', 'Tight timing, real pressure']],
+  // everything the simple page decides for you, kept behind Advanced
+  extras: [['Hidden room behind a breakable wall', true],
+           ['A companion that marks missing pickups', true]],
+  pattern: [['Precision course', 'Measured jumps, moving platforms, a clear flag', true],
+            ['Collectathon course', 'Hub rooms, a required pickup count, safe returns']],
+  camera: [['Dynamic', 'Cinematic accents', true], ['Grounded', 'Restrained motion'],
+           ['Tactical', 'Wider, more readable']],
+  tone: [['Energetic', 'Bright, immediate', true], ['Atmospheric', 'Mood leads'],
+         ['Playful', 'Loose and expressive']],
+  stagesOn: [['01 Playable foundation'], ['02 World and visual language'],
+             ['03 Game systems'], ['04 Playtest and review']],
   knobs: [
     ['Jump forgiveness', 42, 'Strict', 'Generous'],
     ['Hazard density', 55, 'Sparse', 'Gauntlet'],
@@ -207,6 +218,7 @@ function stOverview() {
           ${multi('Platform', P.platforms)}
           ${seg('Session length', P.length, 'len')}
           ${seg('Difficulty', P.difficulty, 'diff')}`)}
+        ${advanced()}
       </aside>
     </div>`;
 }
@@ -255,6 +267,50 @@ function styleField() {
         </div>
       </div>
     </div>`;
+}
+
+// Everything the page decides on your behalf, in one closed drawer, ordered by
+// how much difference it makes. Shut by default: a first-timer never meets it.
+function advanced() {
+  const row = (n, inner) => `<div class="adv__i"><span class="adv__k">${n}</span>${inner}</div>`;
+  return `
+    <section class="sect adv" id="adv">
+      <button class="sect__h adv__h" id="adv-h">
+        <i class="h"></i>ADVANCED<span class="adv__n">9</span><i class="chev"></i>
+      </button>
+      <div class="sect__b adv__b">
+        ${row('Notes for the crew',
+          `<textarea class="ta" rows="2" placeholder="Anything the fields above do not cover…"></textarea>`)}
+        ${row('Optional extras', P.extras.map(([n, on], i) => `
+          <label class="ck"><input type="checkbox" ${on ? 'checked' : ''}><span>${n}</span></label>`).join(''))}
+        ${row('Play pattern', P.pattern.map(([n, d, on]) => `
+          <button class="pat${on ? ' is-on' : ''}"><b>${n}</b><em>${d}</em></button>`).join(''))}
+        ${row('Tuning', `
+          <p class="adv__p">Easier to judge after the first playtest — the crew picks sensible values until then.</p>
+          ${P.knobs.map(([n, v, lo, hi, plain]) => `
+            <label class="kn">
+              <span class="kn__t">${n}<b>${plain ? v : v + '%'}</b></span>
+              <input type="range" min="0" max="100" value="${plain ? v * 8 : v}">
+              <span class="kn__e"><em>${lo}</em><em>${hi}</em></span>
+            </label>`).join('')}`)}
+        ${row('Camera feel', segRow(P.camera))}
+        ${row('Emotional tone', segRow(P.tone))}
+        ${row('Feel statement',
+          `<textarea class="ta" rows="2">${esc(P.feelStatement)}</textarea>`)}
+        ${row('Library assets', `
+          <label class="ck"><input type="checkbox"><span>Let the crew reuse assets from the library</span></label>
+          <p class="adv__p">Off by default: the first build is made from scratch, and swapping in library
+            assets happens afterwards in Assets, where you can see them in the game.</p>`)}
+        ${row('Build stages', `
+          ${P.stagesOn.map(([n]) => `
+            <label class="ck"><input type="checkbox" checked><span>${n}</span></label>`).join('')}
+          <p class="adv__p">Switching one off removes it from the build.</p>`)}
+      </div>
+    </section>`;
+}
+function segRow(opts) {
+  return `<div class="seg__row">${opts.map(([n, d, on]) =>
+    `<button class="sg${on ? ' is-on' : ''}" title="${d}">${n}</button>`).join('')}</div>`;
 }
 
 // Platform can be both at once, so it toggles rather than picks. One has to
@@ -346,6 +402,23 @@ function wire() {
         sp.querySelectorAll('.q').forEach((o) => o.classList.remove('is-on'));
         b.classList.add('is-on');
       };
+    });
+  }
+  const adv = document.getElementById('adv');
+  if (adv) {
+    document.getElementById('adv-h').onclick = () => adv.classList.toggle('is-open');
+    adv.querySelectorAll('.adv__i').forEach((g) => {
+      g.querySelectorAll('.pat, .sg').forEach((b) => {
+        b.onclick = () => {
+          const sel = b.classList.contains('pat') ? '.pat' : '.sg';
+          b.parentElement.querySelectorAll(sel).forEach((o) => o.classList.remove('is-on'));
+          b.classList.add('is-on');
+        };
+      });
+      g.querySelectorAll('.kn input').forEach((r) => {
+        const out = r.previousElementSibling.querySelector('b');
+        r.addEventListener('input', () => { out.textContent = r.value + '%'; });
+      });
     });
   }
   const plat = document.getElementById('plat');
