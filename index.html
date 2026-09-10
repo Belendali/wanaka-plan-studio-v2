@@ -4,14 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>Wanaka · Plan Studio v2</title>
+<title>Wanaka · Plan Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="app.css?v=3">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+  /* The plain link is the faithful copy of what shipped.
+     ?after loads the reworked version, so the two compare in one tab. */
+  (function () {
+    var after = /(\?|&)after\b/.test(location.search);
+    document.write('<link rel="stylesheet" href="' + (after ? 'after' : 'app') + '.css?v=4">');
+    window.__AFTER__ = after;
+  })();
+</script>
 </head>
 <body>
 <div id="stage"></div>
-<script src="app.js?v=3"></script>
+<script>
+  (function () {
+    var s = document.createElement('script');
+    s.src = (window.__AFTER__ ? 'after' : 'app') + '.js?v=4';
+    document.body.appendChild(s);
+  })();
+</script>
 </body>
 </html>
